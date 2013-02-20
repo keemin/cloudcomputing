@@ -1,10 +1,92 @@
-<html>
-<head>
-   <title>Cloud Computing</title>
-</head>
-<body>
+<!DOCTYPE HTML>
+<html ng-app='app'>
+  <head>
+   	<title>MapReduce JS Demo - Word count</title>
+		<script src="mapreduce.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.1/angular.js"></script>
+    
+    <script language="javascript" type="text/javascript">
+      angular.module('app', []);
+      
+      //Whatever you put on the controller scope,
+      //will be availalble in the HTML element bound to the controller.
+      function MapreduceController($scope){
+        $scope.data = "tiger,5\nbear,4\ntiger,7";
+        
+        $scope.mapper = function(item, emit) {
+  			  // the map function takes an item from the data-set
+				  // and can map this to a set of new items
+				  //var splitted = item.split(/\s/g);
+  			  var splitted = item.split(",");
+          console.log(splitted.length+ " words to be evaluated by mapper.");
+					  // the 'emit' function is used to yield the new items
+					  // syntax: emit (key, value);
+					  emit(splitted[0], (splitted[1]));
+            console.log("what is it "+emit);
+				
+			  }
+        
+        $scope.reducer = function(key, values, emit) {
+  			  // the reduce function retrieves the emitted items
+				  // by key. The values that were emitted are grouped by key, and are in the 'values' array.
+				
+				  // the emit function is used to return the results
+				  // syntax: emit (value)
+          console.log("what is it "+emit);
+          console.log("In reducer for "+key+" with values "+values)
+				  var ans=0;
+          var total = "";
+          var amt=0;
+          var counting=0;
+          for(value in values){
+            total += values[value];
+            counting++;
+            var ave=counting;
+          }
+        //list the name of the item
+          /*for(value in values) {
+            if(total==""){
+               total += values[value];
+            }else{
+               amt += ", "+values[value];
+            }
+          }
+        */
+          emit({ key: key, count: ave});
+			  }
 
-<h1>Helloworld</h1>
-</body>
+        //We pass an array of data, a map function, and a reduce function to map reduce. 
+        //mapreduce(data, map, reduce)
+        $scope.go = function(){
+           //The mapreduce function is expecting an array. So put the data in one using split. 
+           //mapper_data = $scope.data.split(' '); //Turn the text into a list of words
+           //mapper_data = $scope.data.split(''); //Turn the text into a list of characters
+           mapper_data = $scope.data.split('\n');//Turn the text into a list of lines to send to mappers.
+           console.log(mapper_data.length +" items in the list to send to mappers.");
+           $scope.result = mapreduce(mapper_data, $scope.mapper, $scope.reducer);
 
+        };
+        
+        $scope.go();
+			
+			// all items that were emitted in the reduce step are now put into the 'result' variable
+			// and we can iterate over this collection
+      }
+        
+    </script>
+	</head>
+	<body ng-controller="MapreduceController">
+  
+   <input type="submit" value="Run Mapreduce" ng-click="go()"><br>
+    Put the input text here.<br>
+    <textarea ng-model="data" rows="8" cols="50">testing</textarea>
+    This is the mapreduce result.
+    <ul>
+      <li ng-repeat="item in result">
+        {{item.key}}, {{item.count}}
+      </li>
+    </ul>
+    The raw result:
+    <pre>{{result}}</pre>  
+	</body>
 </html>
