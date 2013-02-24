@@ -43,9 +43,10 @@
         // Request successful, read the response
         var resp = req.responseText;
          // ... and use it as needed by your app.
+           req.open("GET", url, true);
+           req.send();
        }
-      req.open("GET", url, true);
-      req.send();
+    
       
     </script>
       <!-- Main hero unit for a primary marketing message or call to action -->
